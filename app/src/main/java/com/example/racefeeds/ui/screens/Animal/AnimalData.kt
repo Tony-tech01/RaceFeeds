@@ -1,4 +1,4 @@
-package com.example.racefeeds.data
+package com.example.racefeeds.ui.screens.Animal
 
 import com.example.racefeeds.R
 
@@ -13,15 +13,20 @@ object AnimalData {
                     food = listOf(
                         FoodItem(name = "Silage", price = 300.0),
                         FoodItem(name = "Hay", price = 250.0),
-                        FoodItem(name = "Dairy Meal", price = 400.0)
-                    )
+                        FoodItem(name = "Dairy Meal", price = 400.0),
+                        FoodItem(name = "Grass", price = 100.0),
+                        FoodItem(name = "Mineral Block", price = 150.0),
+                        FoodItem(name = "Mixed Feed", price = 220.0),
+
+                        )
                 ),
                 Breed(
                     name = "Jersey",
                     food = listOf(
                         FoodItem(name = "Napier Grass", price = 200.0),
-                        FoodItem(name = "Lucerne", price = 280.0)
-                    )
+                        FoodItem(name = "Lucerne", price = 280.0),
+
+                        )
                 )
             )
         ),
@@ -82,7 +87,8 @@ object AnimalData {
                 if (breed.name == breedName) {
                     return FoodInfo(
                         title = "Food for ${animal.name} - ${breed.name}",
-                        items = breed.food)
+                        items = breed.food
+                    )
         }
             }
     }

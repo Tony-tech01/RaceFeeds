@@ -1,4 +1,4 @@
-package com.example.racefeeds.data
+package com.example.racefeeds.ui.screens.Animal
 
 data class Animal(
     val name: String,

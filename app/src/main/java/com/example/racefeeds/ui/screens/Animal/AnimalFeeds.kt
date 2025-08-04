@@ -1,24 +1,19 @@
-package com.example.racefeeds.ui.screens.Farm
+package com.example.racefeeds.ui.screens.Animal
 
-import android.graphics.Color.alpha
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -42,84 +37,99 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.racefeeds.data.AnimalData.animals
-import com.example.racefeeds.ui.HeadWithSeeAll
-import com.example.racefeeds.ui.SearchBar
+import com.example.racefeeds.ui.Components.CartIconWithBadge
+import com.example.racefeeds.ui.Components.HeadWithSeeAll
+import com.example.racefeeds.ui.Components.ScreenTitleWithCart
+import com.example.racefeeds.ui.Components.SearchBar
+import com.example.racefeeds.ui.screens.Cart.CartViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FarmPage(modifier: Modifier = Modifier, innerPadding: PaddingValues) {
-    val farmViewModel: FarmViewModel = viewModel()
-    val uiState by farmViewModel.uiState.collectAsState()
+fun FarmPage(
+    modifier: Modifier = Modifier,
+    cartViewModel: CartViewModel,
+    onNavigateToCart: () -> Unit,
+
+    ) {
+    val animalViewModel: AnimalViewModel = viewModel()
+    val uiState by animalViewModel.uiState.collectAsState()
+
+    val cartCount by cartViewModel.cartCount.collectAsState()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+
 
     Scaffold(
-        modifier = modifier, topBar = {
+        topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Race Feeds") },
-                navigationIcon = {
-                    IconButton(onClick = {}) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
                 modifier = Modifier.statusBarsPadding(),
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
             )
-        }) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
+        }) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        ) {
 
-            Text(
-                text = "Animal Feeds",
-                modifier = Modifier.padding(12.dp),
-                style = MaterialTheme.typography.headlineLarge
+
+            ScreenTitleWithCart(
+                title = "Animal Feeds",
+                cartCount = cartCount,
+                onNavigateToCart = onNavigateToCart
             )
 
             SearchBar(
                 query = uiState.searchQuery,
-                onQueryChange = farmViewModel::onSearchQueryChanged,
+                onQueryChange = animalViewModel::onSearchQueryChanged,
                 placeholder = "Search for animal feeds",
-                onSearchTriggered = {})
+                onSearchTriggered = {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                }
+            )
 
             HeadWithSeeAll(title = "Animal Categories")
 
-            Spacer(modifier = Modifier.height(4.dp))
 
 
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(uiState.displayedAnimals.size) { animal ->
+                items(uiState.displayedAnimals) { animal ->
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clip(RoundedCornerShape(14.dp))
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(14.dp))
                             .background(Color.LightGray.copy(alpha = 0.3f))
-
                             .clickable {
-                            farmViewModel.onAnimalSelected(animals[animal])
-                        }
-                            .padding(8.dp)
-                            ,
+                                animalViewModel.onAnimalSelected(animal)
+                            }
+                            .padding(8.dp),
                     ) {
                         Image(
-                            painter = painterResource(id = animals[animal].image),
-                            contentDescription = animals[animal].name,
+                            painter = painterResource(id = animal.image),
+                            contentDescription = animal.name,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .size(80.dp)
                                 .clip(RoundedCornerShape(14.dp))
-
                         )
                         Text(
-                            text = animals[animal].name,
+                            text = animal.name,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(end = 4.dp)
@@ -128,55 +138,83 @@ fun FarmPage(modifier: Modifier = Modifier, innerPadding: PaddingValues) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+
+
 
 
             uiState.selectedAnimal?.let { animal ->
                 if (animal.breeds.isNotEmpty()) {
                     Text(
                         text = "Select Breed:",
-                        modifier = Modifier.padding(start = 16.dp, top = 8.dp),
+                        modifier = Modifier.padding(start = 12.dp),
                         style = MaterialTheme.typography.titleMedium
                     )
 
                     LazyRow(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                            .padding(horizontal = 12.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(animal.breeds.size) { breed ->
-                            Card(modifier = Modifier
-                                .clickable { farmViewModel.onBreedSelected(animal.breeds[breed]) }
-                                .padding(vertical = 8.dp),
+                            Card(
+                                modifier = Modifier
+                                    .clickable {
+                                        animalViewModel.onBreedSelected(
+                                            animal.breeds[breed]
+                                        )
+                                    }
+                                    .padding(vertical = 8.dp),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD))) {
                                 Text(
                                     text = animal.breeds[breed].name,
-                                    modifier = Modifier.padding(12.dp),
+                                    modifier = Modifier.padding(
+                                        horizontal = 12.dp,
+                                        vertical = 8.dp
+                                    ),
                                     style = MaterialTheme.typography.bodyLarge
                                 )
                             }
                         }
                     }
+
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+
 
 
             uiState.foodInfo?.let { foodInfo ->
-                Text(
-                    text = "Food Info for ${uiState.selectedBreed?.name}",
-                    modifier = Modifier.padding(start = 16.dp, bottom = 8.dp),
-                    style = MaterialTheme.typography.titleMedium
-                )
 
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    Text(
+                        text = uiState.selectedBreed?.let { "Food Info for ${it.name}" }
+                            ?: uiState.selectedAnimal?.let { "Food Info for ${it.name}" }
+                            ?: "Food Info",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+
+                    Button(
+                        onClick = { animalViewModel.closeBreedSheet() },
+                    ) {
+                        Text(text = "Close")
+                    }
+                }
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 90.dp, top = 16.dp, start = 16.dp, end = 16.dp)
                 ) {
                     items(foodInfo.items) { foodItem ->
                         Card(
@@ -197,20 +235,27 @@ fun FarmPage(modifier: Modifier = Modifier, innerPadding: PaddingValues) {
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                     Text(
-                                        text = "Price: KES ${foodItem.price}",
+                                        text = "Price: KES ${foodItem.price} per Kg",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = Color.Gray
                                     )
                                 }
                                 Button(
-                                    onClick = { /* TODO: Add to cart logic here */ },
+                                    onClick = {
+                                        cartViewModel.addToCart(
+                                            foodItem.name,
+                                            foodItem.price
+                                        )
+                                    },
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
                                     Text("Add to Cart")
                                 }
                             }
                         }
+
                     }
+
                 }
 
             }
@@ -220,7 +265,7 @@ fun FarmPage(modifier: Modifier = Modifier, innerPadding: PaddingValues) {
             uiState.errorMessage?.let { error ->
                 LaunchedEffect(error) {
                     kotlinx.coroutines.delay(3000)
-                    farmViewModel.clearErrorMessage()
+                    animalViewModel.clearErrorMessage()
                 }
                 Text(
                     text = error, color = Color.Red, modifier = Modifier.padding(16.dp)

@@ -1,6 +1,6 @@
-package com.example.racefeeds.data
+package com.example.racefeeds.ui.screens.Animal
 
-data class FarmUiState(
+data class AnimalUiState(
     val searchQuery: String = "",
     val displayedAnimals: List<Animal> = emptyList(),
     val selectedAnimal: Animal? = null,

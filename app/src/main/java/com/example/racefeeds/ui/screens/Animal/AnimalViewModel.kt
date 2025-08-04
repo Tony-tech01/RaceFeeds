@@ -1,22 +1,18 @@
-package com.example.racefeeds.ui.screens.Farm
+package com.example.racefeeds.ui.screens.Animal
 
 import androidx.lifecycle.ViewModel
-import com.example.racefeeds.data.Animal
 import androidx.lifecycle.viewModelScope
-import com.example.racefeeds.data.AnimalData
-import com.example.racefeeds.data.Breed
-import com.example.racefeeds.data.FarmUiState
-import com.example.racefeeds.data.FoodInfo
+import com.example.racefeeds.ui.screens.Animal.AnimalUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class FarmViewModel : ViewModel() {
+class AnimalViewModel : ViewModel() {
 
-    private val _uiState = MutableStateFlow(FarmUiState())
-    val uiState: StateFlow<FarmUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(AnimalUiState())
+    val uiState: StateFlow<AnimalUiState> = _uiState.asStateFlow()
 
     init{
         loadInitialAnimals()
@@ -51,11 +47,18 @@ class FarmViewModel : ViewModel() {
 
     private fun filterAnimals(query: String) {
         viewModelScope.launch {
-            val filteredList = if (query.isBlank()) AnimalData.animals
-            else AnimalData.animals.filter { it.name.contains(query, ignoreCase = true) }
+            val filteredList = if (query.isBlank()) {
+                AnimalData.animals
+            } else {
+                AnimalData.animals.filter {
+                    it.name.trim().contains(query.trim(), ignoreCase = true)
+                }
+            }
+            println("Filtered list: ${filteredList.map { it.name }}")
             _uiState.update { it.copy(displayedAnimals = filteredList) }
         }
     }
+
 
     fun onAnimalSelected(animal: Animal) {
         if (animal.breeds.isEmpty()) {
