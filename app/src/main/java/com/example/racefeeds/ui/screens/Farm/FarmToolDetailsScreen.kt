@@ -20,16 +20,27 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -40,8 +51,9 @@ import androidx.navigation.NavController
 import com.example.racefeeds.R
 import com.example.racefeeds.ui.Components.ToolCard
 import com.example.racefeeds.ui.screens.Cart.CartViewModel
+import kotlinx.coroutines.launch
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FarmToolDetailsScreen(
     toolId: String,
@@ -49,16 +61,34 @@ fun FarmToolDetailsScreen(
     cartViewModel: CartViewModel = remember { CartViewModel() },
     navController: NavController
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+
+
+
+
     LaunchedEffect(toolId) {
         farmSupplyViewModel.loadToolById(toolId)
     }
 
-    val context = LocalContext.current
     val tool by farmSupplyViewModel.toolDetailState.collectAsState()
-    val uiState by farmSupplyViewModel.uiState.collectAsState()
 
-    Scaffold(contentWindowInsets = WindowInsets.systemBars) { innerPadding ->
-        when (tool) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Tool Details") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigateUp() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets.systemBars
+    ) { innerPadding ->
+
+    when (tool) {
             is ToolUiState.Loading -> {
                 Box(
                     modifier = Modifier
@@ -87,88 +117,55 @@ fun FarmToolDetailsScreen(
 
             is ToolUiState.Success -> {
                 val currentTool = (tool as ToolUiState.Success).tool
+                val painter = runCatching {
+                    painterResource(id = currentTool.imageRes)
+                }.getOrElse {
+                    painterResource(id = R.drawable.ic_launcher_foreground)
+                }
 
-
-
-
-                LazyColumn(
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(innerPadding),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(innerPadding)
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    item {
-                        Image(
-                            painter = runCatching {
-                                painterResource(id = currentTool.imageRes)
-                            }.getOrElse {
-                                painterResource(id = R.drawable.ic_launcher_foreground) // fallback
-                            },
-                            contentDescription = currentTool.name,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp),
-                            contentScale = ContentScale.Crop
-                        )
+                    Image(
+                        painter = painter,
+                        contentDescription = currentTool.name,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentScale = ContentScale.Crop
+                    )
 
-                        Text(
-                            text = currentTool.name,
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-                        Text(
-                            text = "Category: ${currentTool.category}",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Text(
-                            text = currentTool.description,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Text(
-                            text = "KSh ${currentTool.price}",
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                    Text(text = currentTool.name, style = MaterialTheme.typography.headlineSmall)
+                    Text(
+                        text = "Category: ${currentTool.category}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(text = currentTool.description, style = MaterialTheme.typography.bodyLarge)
+                    Text(text = "KSh ${currentTool.price}", style = MaterialTheme.typography.titleMedium)
 
-                        Button(
-                            onClick = {
-                                cartViewModel.addToCart(
-                                    itemName = currentTool.name,
-                                    price = currentTool.price
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Add to Cart")
-                        }
-
-                        Text(
-                            text = "More Tools",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-
-                    item {
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            modifier = Modifier.fillMaxWidth(),
-                            contentPadding = PaddingValues(bottom = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(uiState.tools.size) { index ->
-                                val farmTool = uiState.tools[index]
-                                ToolCard(
-                                    tool = farmTool,
-                                    onClick = {
-                                        Log.d("ToolNav", "Navigating to: ${farmTool.id}")
-                                        navController.navigate("farmToolDetails/${farmTool.id}")
-                                    },
-                                    cartViewModel = cartViewModel,
-                                    navController = navController
+                    Button(
+                        onClick = {
+                            cartViewModel.addToCart(
+                                itemName = currentTool.name,
+                                price = currentTool.price
+                            )
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "${currentTool.name} added to cart",
+                                    duration = SnackbarDuration.Short
                                 )
                             }
-                        }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Add to Cart")
                     }
+
                 }
             }
         }
