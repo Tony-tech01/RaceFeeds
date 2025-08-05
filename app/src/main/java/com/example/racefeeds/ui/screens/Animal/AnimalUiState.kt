@@ -10,5 +10,8 @@ data class AnimalUiState(
     val isLoading: Boolean = false,
     val isLoadingAnimals: Boolean = false,
     val isLoadingBreeds: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val matchingFoodItems: List<FoodItem> = emptyList(),
+    val matchingBreeds: List<Breed> = emptyList(),
+    val matchingFeedsWithContext: List<FeedContext> = emptyList()
 )

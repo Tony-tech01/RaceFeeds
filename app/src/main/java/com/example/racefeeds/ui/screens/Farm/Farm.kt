@@ -29,7 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import com.example.racefeeds.ui.Components.CartIconWithBadge
 import com.example.racefeeds.ui.Components.ToolCard
-import com.example.racefeeds.ui.Components.TopBarWithCart
+
 import com.example.racefeeds.ui.screens.Cart.CartViewModel
 import androidx.compose.material3.Scaffold
 import androidx.compose.foundation.layout.WindowInsets
@@ -39,26 +39,37 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.unit.sp
 import com.example.racefeeds.ui.Components.ScreenTitleWithCart
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FarmScreen(
-    viewModel: FarmSupplyViewModel = viewModel(),
+    farmSupplyViewModel: FarmSupplyViewModel = viewModel(),
     cartViewModel: CartViewModel,
     navController: NavController,
     onNavigateToCart: () -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by farmSupplyViewModel.uiState.collectAsState()
     val cartCount by cartViewModel.cartCount.collectAsState()
 
     Scaffold(
-         topBar = {
+        topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Race Feeds") },
+                title = {
+                    Text(
+                        "Race Feeds",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 32.sp
+                    )
+                },
                 modifier = Modifier.statusBarsPadding(),
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         }
@@ -66,7 +77,7 @@ fun FarmScreen(
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
-            .padding(WindowInsets.statusBars.asPaddingValues())
+
 
         ) {
 
@@ -78,7 +89,7 @@ fun FarmScreen(
 
             OutlinedTextField(
                 value = uiState.searchQuery,
-                onValueChange = viewModel::onSearch,
+                onValueChange = farmSupplyViewModel::onSearch,
                 placeholder = { Text("Search tools...") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -101,7 +112,7 @@ fun FarmScreen(
                                 if (isSelected) Color(0xFFE0F2F1) else Color.Transparent,
                                 shape = RoundedCornerShape(20.dp)
                             )
-                            .clickable { viewModel.onCategorySelected(category.name) }
+                            .clickable { farmSupplyViewModel.onCategorySelected(category.name) }
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                     )

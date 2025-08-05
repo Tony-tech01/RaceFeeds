@@ -107,7 +107,8 @@ fun HeadWithSeeAll(
     ){
         Text(
             text = title,
-            style = MaterialTheme.typography.headlineLarge
+            style = MaterialTheme.typography.headlineLarge,
+            fontSize = 24.sp
         )
 
         Text(
@@ -313,35 +314,7 @@ fun ToolCard(
         }
     }
 }
-@Composable
-fun TopBarWithCart(
-    cartCount: Int,
-    onCartClick: () -> Unit,
-    innerPaddingValues: PaddingValues
-) {
-    Surface(tonalElevation = 4.dp) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(innerPaddingValues)
-                .background(MaterialTheme.colorScheme.primary)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Farm Supplies",
-                style = MaterialTheme.typography.titleLarge,
-                color = Color.White
-            )
 
-            CartIconWithBadge(
-                cartCount = cartCount,
-                onCartClick = onCartClick
-            )
-        }
-    }
-}
 
 @Composable
 fun ScreenTitleWithCart(
@@ -358,7 +331,8 @@ fun ScreenTitleWithCart(
     ){
         Text(
             text = title,
-            style = MaterialTheme.typography.headlineLarge
+            style = MaterialTheme.typography.headlineLarge,
+            fontSize = 24.sp
         )
         CartIconWithBadge(
             cartCount = cartCount,

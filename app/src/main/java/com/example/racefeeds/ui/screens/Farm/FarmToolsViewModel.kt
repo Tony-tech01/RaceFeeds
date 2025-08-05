@@ -45,9 +45,14 @@ class FarmSupplyViewModel : ViewModel() {
     fun onSearch(query: String) {
         _uiState.value = _uiState.value.copy(
             searchQuery = query,
-            tools = allTools.filter {
-                it.category == _uiState.value.selectedCategory &&
-                        it.name.contains(query, ignoreCase = true)
+            tools = if (query.isNotBlank()) {
+                allTools.filter {
+                    it.name.contains(query, ignoreCase = true)
+                }
+            } else {
+                allTools.filter {
+                    it.category == _uiState.value.selectedCategory
+                }
             }
         )
     }

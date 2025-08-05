@@ -2,7 +2,6 @@ package com.example.racefeeds.ui.screens.Animal
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.racefeeds.ui.screens.Animal.AnimalUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,9 +13,10 @@ class AnimalViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(AnimalUiState())
     val uiState: StateFlow<AnimalUiState> = _uiState.asStateFlow()
 
-    init{
+    init {
         loadInitialAnimals()
     }
+
     private fun loadInitialAnimals() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingAnimals = true) }
@@ -24,15 +24,13 @@ class AnimalViewModel : ViewModel() {
                 val initialAnimals = AnimalData.animals
                 _uiState.update {
                     it.copy(
-                        displayedAnimals = initialAnimals,
-                        isLoadingAnimals = false
+                        displayedAnimals = initialAnimals, isLoadingAnimals = false
                     )
                 }
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        errorMessage = "Failed to load initial animals",
-                        isLoadingAnimals = false
+                        errorMessage = "Failed to load initial animals", isLoadingAnimals = false
                     )
                 }
             }
@@ -47,18 +45,83 @@ class AnimalViewModel : ViewModel() {
 
     private fun filterAnimals(query: String) {
         viewModelScope.launch {
-            val filteredList = if (query.isBlank()) {
-                AnimalData.animals
-            } else {
-                AnimalData.animals.filter {
-                    it.name.trim().contains(query.trim(), ignoreCase = true)
+            val loweredQuery = query.trim().lowercase()
+
+            val matchingFeedsWithContext = mutableListOf<FeedContext>()
+            val matchingAnimals = mutableSetOf<Animal>()
+            val matchingBreeds = mutableSetOf<Breed>()
+
+            AnimalData.animals.forEach { animal ->
+                val isAnimalMatch = animal.name.lowercase().contains(loweredQuery)
+
+                if (isAnimalMatch) {
+                    matchingAnimals += animal
+                    val filteredBreeds = filterBreedsForAnimal(animal, loweredQuery)
+                    matchingBreeds += filteredBreeds
+                }
+
+                animal.food.forEach { food ->
+                    if (food.name.lowercase().contains(loweredQuery)) {
+                        matchingFeedsWithContext += FeedContext(feedItem = food, breed = null, animal = animal)
+                        matchingAnimals += animal
+                    }
+                }
+
+                animal.breeds.forEach { breed ->
+                    val isBreedMatch = breed.name.lowercase().contains(loweredQuery)
+                    if (isBreedMatch) {
+                        matchingBreeds += breed
+                        matchingAnimals += animal
+                    }
+
+                    breed.food.forEach { food ->
+                        if (food.name.lowercase().contains(loweredQuery)) {
+                            matchingFeedsWithContext += FeedContext(feedItem = food, breed = breed, animal = animal)
+                            matchingBreeds += breed
+                            matchingAnimals += animal
+                        }
+                    }
                 }
             }
-            println("Filtered list: ${filteredList.map { it.name }}")
-            _uiState.update { it.copy(displayedAnimals = filteredList) }
+
+            _uiState.update {
+                it.copy(
+                    searchQuery = query,
+                    displayedAnimals = matchingAnimals.toList(),
+                    matchingBreeds = matchingBreeds.toList(),
+                    matchingFeedsWithContext = matchingFeedsWithContext
+                )
+            }
         }
     }
 
+    fun onFeedSelected(feedItem: FoodItem, breed: Breed?, animal: Animal) {
+        val title = when {
+            breed != null -> "Feed Info for ${breed.name} (${animal.name})"
+            else -> "Feed Info for ${animal.name}"
+        }
+
+        _uiState.update {
+            it.copy(
+                searchQuery = "",
+                matchingFeedsWithContext = emptyList(),
+                displayedAnimals = listOf(animal),
+                selectedAnimal = animal,
+                selectedBreed = breed,
+                foodInfo = FoodInfo(title = title, items = listOf(feedItem)),
+                errorMessage = null,
+                isBreedSheetVisible = breed == null && animal.breeds.isNotEmpty()
+            )
+        }
+    }
+
+    fun filterBreedsForAnimal(animal: Animal, feedQuery: String): List<Breed> {
+        return animal.breeds.filter { breed ->
+            breed.food.any { feed ->
+                feed.name.contains(feedQuery, ignoreCase = true)
+            }
+        }
+    }
 
     fun onAnimalSelected(animal: Animal) {
         if (animal.breeds.isEmpty()) {
@@ -117,6 +180,7 @@ class AnimalViewModel : ViewModel() {
             )
         }
     }
+
     fun clearErrorMessage() {
         _uiState.update { it.copy(errorMessage = null) }
     }

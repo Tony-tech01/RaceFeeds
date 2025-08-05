@@ -23,3 +23,9 @@ data class FoodItem(
     val price: Double
 
 )
+
+data class FeedContext(
+    val feedItem: FoodItem,
+    val breed: Breed?,
+    val animal: Animal
+)
