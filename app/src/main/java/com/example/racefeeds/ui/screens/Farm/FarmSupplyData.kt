@@ -1,7 +1,7 @@
 package com.example.racefeeds.data
 
+import FarmTool
 import com.example.racefeeds.R
-import com.example.racefeeds.ui.screens.Farm.FarmTool
 
 object FarmSupplyData {
     val farmTools = listOf(

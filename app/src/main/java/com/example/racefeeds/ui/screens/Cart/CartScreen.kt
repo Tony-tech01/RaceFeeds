@@ -55,11 +55,6 @@ fun CartScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Cart") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
             )
         }
     ) { padding ->

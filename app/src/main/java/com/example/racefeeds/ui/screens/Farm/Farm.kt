@@ -65,7 +65,10 @@ fun FarmScreen(
     ) { innerPadding ->
         Column(modifier = Modifier
             .fillMaxSize()
-            .padding(innerPadding)) {
+            .padding(innerPadding)
+            .padding(WindowInsets.statusBars.asPaddingValues())
+
+        ) {
 
             ScreenTitleWithCart(
                 title = "Farm Supplies",
@@ -114,7 +117,12 @@ fun FarmScreen(
             ) {
                 items(uiState.tools.size) { index ->
                     val tool = uiState.tools[index]
-                    ToolCard(tool = tool, onClick = {})
+                    ToolCard(
+                        tool = tool,
+                        onClick = {navController.navigate("farmToolDetails/${tool.id}")},
+                        cartViewModel= cartViewModel,
+                        navController = navController
+                    )
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.example.racefeeds.ui.Components
 
+import FarmTool
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,7 +56,7 @@ import com.example.racefeeds.ui.screens.Checkout.CheckoutScreen
 import com.example.racefeeds.ui.screens.Checkout.CheckoutViewModel
 import com.example.racefeeds.ui.screens.Checkout.OrderSuccessScreen
 import com.example.racefeeds.ui.screens.Farm.FarmScreen
-import com.example.racefeeds.ui.screens.Farm.FarmTool
+import com.example.racefeeds.ui.screens.Farm.FarmToolDetailsScreen
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -188,6 +190,15 @@ fun AppNavGraph(
             )
         }
 
+        composable("farmToolDetails/{toolId}") { backStackEntry ->
+            val toolId = backStackEntry.arguments?.getString("toolId") ?: ""
+            FarmToolDetailsScreen(
+                toolId = toolId,
+                cartViewModel = cartViewModel,
+                navController = navController
+                )
+        }
+
         composable("order_success") {
             OrderSuccessScreen()
         }
@@ -254,7 +265,12 @@ fun BottomBar(
 }
 
 @Composable
-fun ToolCard(tool: FarmTool, onClick: () -> Unit) {
+fun ToolCard(
+    tool: FarmTool,
+    onClick: () -> Unit,
+    cartViewModel: CartViewModel,
+    navController: NavController
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -272,9 +288,28 @@ fun ToolCard(tool: FarmTool, onClick: () -> Unit) {
                 contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = tool.name, fontWeight = FontWeight.Bold)
-            Text(text = "Ksh ${tool.price}", style = MaterialTheme.typography.bodyMedium
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(text = tool.name, fontWeight = FontWeight.Bold)
+                    Text(text = "Ksh ${tool.price}", style = MaterialTheme.typography.bodyMedium)
+                }
+                IconButton(onClick = {
+                    cartViewModel.addToCart(
+                       tool.name,
+                        tool.price
+                    )
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add to cart",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
         }
     }
 }

@@ -1,9 +1,9 @@
-package com.example.racefeeds.ui.screens.Farm
+import androidx.annotation.DrawableRes
 
 data class FarmTool(
     val id: String,
     val name: String,
-    val imageRes: Int,
+    @DrawableRes val imageRes: Int,
     val price: Double,
     val description: String,
     val category: String
