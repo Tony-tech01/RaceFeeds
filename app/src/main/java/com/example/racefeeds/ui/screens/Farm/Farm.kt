@@ -1,6 +1,7 @@
 package com.example.racefeeds.ui.screens.Farm
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,7 +37,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.unit.sp
@@ -63,6 +68,15 @@ fun FarmScreen(
                         fontWeight = FontWeight.Bold,
                         fontSize = 32.sp
                     )
+                },
+                actions = {
+                    IconButton(onClick = {navController.navigate("settings")}){
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings"
+                        )
+
+                    }
                 },
                 modifier = Modifier.statusBarsPadding(),
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -104,12 +118,22 @@ fun FarmScreen(
             ) {
                 itemsIndexed(uiState.categories) { index, category ->
                     val isSelected = category.name == uiState.selectedCategory
+                    val highlightColor = if (isSelected) {
+                        MaterialTheme.colorScheme.secondaryContainer
+                    } else {
+                        Color.Transparent
+                    }
                     Text(
                         text = category.name,
                         modifier = Modifier
                             .padding(end = 12.dp)
                             .background(
-                                if (isSelected) Color(0xFFE0F2F1) else Color.Transparent,
+                                color = highlightColor,
+                                shape = RoundedCornerShape(20.dp)
+                            )
+                            .border(
+                                width = if (isSelected) 2.dp else 0.dp,
+                                color = MaterialTheme.colorScheme.primary,
                                 shape = RoundedCornerShape(20.dp)
                             )
                             .clickable { farmSupplyViewModel.onCategorySelected(category.name) }

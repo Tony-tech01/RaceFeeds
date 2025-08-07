@@ -5,6 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.racefeeds.ui.screens.Checkout.CheckoutUiState
 import com.example.racefeeds.ui.screens.Cart.CartItem
 import com.example.racefeeds.ui.screens.Checkout.PaymentOption
+import com.example.racefeeds.ui.screens.OrderHistory.Order
+import com.example.racefeeds.ui.screens.OrderHistory.OrderRepository
+import com.example.racefeeds.ui.screens.OrderHistory.OrderStatus
 import kotlinx.coroutines.delay
 
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,9 +15,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.threeten.bp.LocalDateTime
 
 
-class CheckoutViewModel : ViewModel() {
+class CheckoutViewModel(private val orderRepository: OrderRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CheckoutUiState())
     val uiState: StateFlow<CheckoutUiState> = _uiState.asStateFlow()
@@ -48,40 +52,60 @@ class CheckoutViewModel : ViewModel() {
         }
     }
 
+    private fun generateOrderId(): String {
+        return "ORD-${System.currentTimeMillis()}"
+    }
 
     fun placeOrder() {
         val state = _uiState.value
 
 
-        if (state.location.isBlank() || state.paymentOption == null) {
-            _uiState.update {
-                it.copy(errorMessage = "Please fill in location and choose a payment option")
-            }
+        if (state.location.isBlank()) {
+            showError("Please enter a delivery location")
+            return
+        }
+
+        if (state.paymentOption == null) {
+            showError("Please choose a payment option")
             return
         }
 
 
         if (state.paymentOption == PaymentOption.MPESA && state.phoneNumber.isBlank()) {
-            _uiState.update {
-                it.copy(errorMessage = "Please enter a valid phone number for M-Pesa")
-            }
+            showError("Please enter a valid phone number for M-Pesa")
             return
         }
+
 
         viewModelScope.launch {
             _uiState.update { it.copy(isProcessingPayment = true, errorMessage = null) }
 
-            delay(5000)
+            delay(2000)
+
+
+            val newOrder = Order(
+                id = generateOrderId(),
+                items = state.cartItems,
+                status = OrderStatus.PENDING,
+                date = LocalDateTime.now(),
+                trackingInfo = null
+            )
+
+            orderRepository.addOrder(newOrder)
+
 
             _uiState.update {
                 it.copy(
                     isOrderPlaced = true,
                     showConfirmationDialog = true,
-                    isProcessingPayment = false
+                    isProcessingPayment = false,
+                    cartItems = emptyList(),
+                    location = "",
+                    phoneNumber = "",
+                    paymentOption = null
                 )
             }
         }
-
     }
 
 

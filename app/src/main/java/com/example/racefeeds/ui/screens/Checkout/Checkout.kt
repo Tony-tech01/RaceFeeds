@@ -23,19 +23,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.racefeeds.ui.screens.Checkout.PaymentOption
 import com.example.racefeeds.ui.screens.Cart.CartViewModel
 
 
 @Composable
 fun CheckoutScreen(
-    checkoutViewModel: CheckoutViewModel = viewModel(),
+    checkoutViewModel: CheckoutViewModel,
     navController: NavController,
     innerPadding: PaddingValues,
     cartViewModel: CartViewModel,
@@ -129,29 +129,43 @@ fun CheckoutScreen(
                 } else {
                     checkoutViewModel.clearError()
                 }
-            }, modifier = Modifier.fillMaxWidth()
+            },
+            enabled = !uiState.isProcessingPayment,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Place Order")
+            if (uiState.isProcessingPayment) {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+            } else {
+                Text("Place Order")
+            }
         }
+
         if (uiState.showConfirmationDialog) {
-            AlertDialog(onDismissRequest = {}, title = { Text("Payment Sent") }, text = {
-                if (uiState.isWaitingForPayment) {
-                    Text("Waiting for payment confirmation from M-Pesa...")
-                } else {
-                    Text("Payment confirmed!")
-                }
-            }, confirmButton = {
-                if (!uiState.isWaitingForPayment) {
-                    TextButton(onClick = {
-                        checkoutViewModel.dismissDialog()
-                        checkoutViewModel.confirmOrder()
-                    }) {
-                        Text("Continue")
+            AlertDialog(
+                onDismissRequest = {},
+                title = { Text("Payment Sent") },
+                text = {
+                    if (uiState.isWaitingForPayment) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text("Waiting for payment confirmation...")
+                        }
+                    } else {
+                        Text("Payment confirmed!")
                     }
-                } else {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                },
+                confirmButton = {
+                    if (!uiState.isWaitingForPayment) {
+                        TextButton(onClick = {
+                            checkoutViewModel.dismissDialog()
+                            checkoutViewModel.confirmOrder()
+                        }) {
+                            Text("Continue")
+                        }
+                    }
                 }
-            })
+            )
         }
 
 

@@ -58,5 +58,9 @@ class CartViewModel: ViewModel()  {
         }
 
     }
+    fun clearCart() {
+        _cartItems.update { emptyList() }
+    }
+
 
 }

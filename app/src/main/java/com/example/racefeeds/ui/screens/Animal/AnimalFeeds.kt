@@ -16,11 +16,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -42,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.racefeeds.ui.Components.HeadWithSeeAll
 import com.example.racefeeds.ui.Components.ScreenTitleWithCart
 import com.example.racefeeds.ui.Components.SearchBar
@@ -53,7 +58,7 @@ fun FarmPage(
     modifier: Modifier = Modifier,
     cartViewModel: CartViewModel,
     onNavigateToCart: () -> Unit,
-
+    navController: NavController
     ) {
     val animalViewModel: AnimalViewModel = viewModel()
     val uiState by animalViewModel.uiState.collectAsState()
@@ -74,9 +79,21 @@ fun FarmPage(
                         fontSize = 32.sp
                     )
                 },
+                actions = {
+                    IconButton(onClick = {navController.navigate("settings")}){
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings"
+                        )
+
+                    }
+                },
                 modifier = Modifier.statusBarsPadding(),
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         }) { innerPadding ->
@@ -217,25 +234,32 @@ fun FarmPage(
                                 modifier = Modifier
                                     .clickable { animalViewModel.onBreedSelected(breed) }
                                     .background(
-                                        color = highlightColor,
+                                        color = if (isSelected) highlightColor else MaterialTheme.colorScheme.surface,
                                         shape = RoundedCornerShape(20.dp)
                                     )
-                                    .padding(vertical = 8.dp)
                                     .border(
-                                        width = if (isSelected) 2.dp else 0.dp,
-                                        color = MaterialTheme.colorScheme.primary,
+                                        width = if (isSelected) 2.dp else 1.dp,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                                         shape = RoundedCornerShape(20.dp)
-                                    ),
+                                    )
+                                    .padding(vertical = 8.dp, horizontal = 12.dp),
                                 shape = RoundedCornerShape(12.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 6.dp else 2.dp)
                             ) {
+
                                 Text(
                                     text = breed.name,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                        color = if (isSelected)
+                                            MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 )
+                                }
                             }
-                        }
+
                     }
                 }
             }

@@ -1,5 +1,7 @@
 package com.example.racefeeds
 
+import com.example.racefeeds.data.SharedViewModelFactory
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,7 +10,19 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.racefeeds.data.BottomNavItem
@@ -16,26 +30,59 @@ import com.example.racefeeds.ui.Components.AppNavGraph
 import com.example.racefeeds.ui.Components.BottomBar
 import com.example.racefeeds.ui.screens.Cart.CartViewModel
 import com.example.racefeeds.ui.screens.Checkout.CheckoutViewModel
+import com.example.racefeeds.ui.screens.OrderHistory.OrderHistoryViewModel
+import com.example.racefeeds.ui.screens.OrderHistory.OrderRepository
+import com.example.racefeeds.ui.screens.settings.SettingsViewModel
 import com.example.racefeeds.ui.theme.RaceFeedsTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
 
     private val cartViewModel: CartViewModel by viewModels()
-    private val checkoutViewModel: CheckoutViewModel by viewModels() // ✅ Added
+    private val settingsViewModel: SettingsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            RaceFeedsTheme {
-                val navController = rememberNavController()
-                val navBackStackEntry = navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry.value?.destination
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        var keepSplashVisible = true
+        splashScreen.setKeepOnScreenCondition { keepSplashVisible }
+        lifecycleScope.launch {
+            delay(2000)
+            keepSplashVisible = false
+        }
+
+        setContent {
+            val isDarkMode by settingsViewModel.isDarkMode.collectAsState()
+            val navController = rememberNavController()
+            val navBackStackEntry = navController.currentBackStackEntryAsState()
+            val currentDestination = navBackStackEntry.value?.destination
+            val orderRepository = remember { OrderRepository() }
+
+
+            val sharedFactory = remember { SharedViewModelFactory(orderRepository) }
+
+            val checkoutViewModel: CheckoutViewModel = viewModel(factory = sharedFactory)
+            val orderHistoryViewModel: OrderHistoryViewModel = viewModel(factory = sharedFactory)
+
+            val view = LocalView.current
+            val window = (view.context as Activity).window
+            SideEffect {
+                window.statusBarColor = Color.Transparent.toArgb()
+                window.navigationBarColor = Color.Transparent.toArgb()
+
+                WindowInsetsControllerCompat(window, view).isAppearanceLightStatusBars = !isDarkMode
+                WindowInsetsControllerCompat(window, view).isAppearanceLightNavigationBars =
+                    !isDarkMode
+            }
+
+            RaceFeedsTheme(darkTheme = isDarkMode) {
                 Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    bottomBar = {
+                    modifier = Modifier.fillMaxSize(), bottomBar = {
                         if (currentDestination?.route in listOf(
                                 BottomNavItem.Feed.route,
                                 BottomNavItem.Farm.route,
@@ -47,8 +94,7 @@ class MainActivity : ComponentActivity() {
                                 currentDestination = currentDestination
                             )
                         }
-                    }
-                ) { contentPadding ->
+                    }) { contentPadding ->
                     AppNavGraph(
                         navController = navController,
                         cartViewModel = cartViewModel,
@@ -57,7 +103,9 @@ class MainActivity : ComponentActivity() {
                         onNavigateToCheckout = {
                             checkoutViewModel.setCartItems(cartViewModel.cartItems.value)
                             navController.navigate("checkout")
-                        }
+                        },
+                        settingsViewModel = settingsViewModel,
+                        orderHistoryViewModel = orderHistoryViewModel
                     )
                 }
             }
