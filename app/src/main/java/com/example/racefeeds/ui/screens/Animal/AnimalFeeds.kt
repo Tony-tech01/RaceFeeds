@@ -29,7 +29,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -58,8 +57,8 @@ fun FarmPage(
     modifier: Modifier = Modifier,
     cartViewModel: CartViewModel,
     onNavigateToCart: () -> Unit,
-    navController: NavController
-    ) {
+    navController: NavController,
+) {
     val animalViewModel: AnimalViewModel = viewModel()
     val uiState by animalViewModel.uiState.collectAsState()
 
@@ -72,20 +71,18 @@ fun FarmPage(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(
-                        "Race Feeds",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 32.sp
-                    )
-                },
+                Text(
+                    "Race Feeds",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 32.sp
+                )
+            },
                 actions = {
-                    IconButton(onClick = {navController.navigate("settings")}){
+                    IconButton(onClick = { navController.navigate("settings") }) {
                         Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings"
+                            imageVector = Icons.Default.Settings, contentDescription = "Settings"
                         )
-
                     }
                 },
                 modifier = Modifier.statusBarsPadding(),
@@ -132,7 +129,8 @@ fun FarmPage(
                 ) {
                     items(uiState.matchingFeedsWithContext) { context ->
                         Card(
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
                                 .clickable {
                                     animalViewModel.onFeedSelected(
                                         feedItem = context.feedItem,
@@ -143,22 +141,33 @@ fun FarmPage(
                             shape = RoundedCornerShape(12.dp),
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
                         ) {
-                           Row(
-                               modifier = Modifier.fillMaxWidth().padding(8.dp),
-                               horizontalArrangement = Arrangement.SpaceBetween,
-                               verticalAlignment = Alignment.CenterVertically
-                           ){
-                               Column(modifier = Modifier.padding(8.dp)) {
-                                   Text("Feed: ${context.feedItem.name}", style = MaterialTheme.typography.bodyLarge)
-                                   Text(
-                                       "Breed: ${context.breed?.name ?: "General"}",
-                                       style = MaterialTheme.typography.bodyMedium,
-                                       modifier = Modifier.padding(vertical = 4.dp)
-                                   )
-                                   Text("Animal: ${context.animal.name}", style = MaterialTheme.typography.bodyMedium)
-                               }
-                               Text("Price: KES ${context.feedItem.price}", style = MaterialTheme.typography.bodyMedium)
-                           }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.padding(8.dp)) {
+                                    Text(
+                                        "Feed: ${context.feedItem.name}",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Text(
+                                        "Breed: ${context.breed?.name ?: "General"}",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(vertical = 4.dp)
+                                    )
+                                    Text(
+                                        "Animal: ${context.animal.name}",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                                Text(
+                                    "Price: KES ${context.feedItem.price}",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
                         }
                     }
                 }
@@ -230,35 +239,36 @@ fun FarmPage(
                                 Color.Transparent
                             }
 
-                            Card(
-                                modifier = Modifier
-                                    .clickable { animalViewModel.onBreedSelected(breed) }
-                                    .background(
-                                        color = if (isSelected) highlightColor else MaterialTheme.colorScheme.surface,
-                                        shape = RoundedCornerShape(20.dp)
+                            Card(modifier = Modifier
+                                .clickable {
+                                    animalViewModel.onBreedSelected(
+                                        breed
                                     )
-                                    .border(
-                                        width = if (isSelected) 2.dp else 1.dp,
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-                                        shape = RoundedCornerShape(20.dp)
-                                    )
-                                    .padding(vertical = 8.dp, horizontal = 12.dp),
+                                }
+                                .background(
+                                    color = if (isSelected) highlightColor else MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(20.dp)
+                                )
+                                .border(
+                                    width = if (isSelected) 2.dp else 1.dp,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                                    shape = RoundedCornerShape(20.dp)
+                                )
+                                .padding(vertical = 8.dp, horizontal = 12.dp),
                                 shape = RoundedCornerShape(12.dp),
-                                elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 6.dp else 2.dp)
-                            ) {
+                                elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 6.dp else 2.dp)) {
 
                                 Text(
                                     text = breed.name,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                     style = MaterialTheme.typography.bodyLarge.copy(
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (isSelected)
-                                            MaterialTheme.colorScheme.primary
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary
                                         else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 )
-                                }
                             }
+                        }
 
                     }
                 }

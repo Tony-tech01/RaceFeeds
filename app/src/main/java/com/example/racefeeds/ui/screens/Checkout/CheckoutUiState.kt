@@ -11,8 +11,8 @@ data class CheckoutUiState(
     val showConfirmationDialog: Boolean = false,
     val isOrderPlaced: Boolean = false,
     val isWaitingForPayment: Boolean = false,
-    val isProcessingPayment: Boolean = false
-
+    val isProcessingPayment: Boolean = false,
+    val checkoutRequestId: String? = null
 
 ){
     val totalPrice: Double

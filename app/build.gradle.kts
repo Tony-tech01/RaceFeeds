@@ -14,8 +14,13 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildFeatures {
+        buildConfig = true
+        compose = true
     }
 
     buildTypes {
@@ -27,23 +32,35 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
-    buildFeatures {
-        compose = true
-    }
+
+
+
 }
 
 dependencies {
-    implementation (libs.androidx.material.icons.extended)
-    implementation (libs.androidx.core.splashscreen)
+    implementation(libs.mpesa.stk.push)
+    implementation(libs.retrofit.v300)
+    implementation(libs.converter.moshi)
+    implementation(libs.logging.interceptor.v4120)
+    implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
+    implementation(libs.firebase.bom.v3270)
+    implementation(libs.com.google.firebase.firebase.auth.ktx)
+    implementation(libs.google.firebase.firestore.ktx)
+    ksp(libs.moshi.kotlin.codegen)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.navigation.compose)
-    implementation (libs.threetenabp)
+    implementation(libs.threetenabp)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -53,6 +70,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -51,8 +51,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.racefeeds.R
 import com.example.racefeeds.data.BottomNavItem
 import com.example.racefeeds.ui.screens.Animal.FarmPage
@@ -64,6 +66,10 @@ import com.example.racefeeds.ui.screens.Farm.FarmScreen
 import com.example.racefeeds.ui.screens.Farm.FarmToolDetailsScreen
 import com.example.racefeeds.ui.screens.OrderHistory.OrderHistoryScreen
 import com.example.racefeeds.ui.screens.OrderHistory.OrderHistoryViewModel
+import com.example.racefeeds.ui.screens.firebase.AuthGateScreen
+import com.example.racefeeds.ui.screens.firebase.AuthViewModel
+import com.example.racefeeds.ui.screens.firebase.LoginScreen
+import com.example.racefeeds.ui.screens.firebase.SignupScreen
 import com.example.racefeeds.ui.screens.settings.SettingsScreen
 import com.example.racefeeds.ui.screens.settings.SettingsViewModel
 
@@ -161,11 +167,14 @@ fun AppNavGraph(
     contentPadding: PaddingValues,
     onNavigateToCheckout: () -> Unit,
     settingsViewModel: SettingsViewModel,
-    orderHistoryViewModel: OrderHistoryViewModel
+    authViewModel: AuthViewModel,
+    orderHistoryViewModel: OrderHistoryViewModel,
 ) {
 
 
-    NavHost(navController = navController, startDestination = BottomNavItem.Feed.route) {
+    NavHost(
+        navController = navController, startDestination = BottomNavItem.Feed.route
+    ) {
 
         composable(BottomNavItem.Feed.route) {
             FarmPage(
@@ -180,7 +189,8 @@ fun AppNavGraph(
                 cartViewModel = cartViewModel,
                 onBackClick = { navController.popBackStack() },
                 onNavigateToCheckout = { navController.navigate("checkout") },
-                navController = navController)
+                navController = navController
+            )
         }
 
         composable(BottomNavItem.Farm.route) {
@@ -196,7 +206,8 @@ fun AppNavGraph(
                 navController = navController,
                 checkoutViewModel = checkoutViewModel,
                 innerPadding = contentPadding,
-                cartViewModel = cartViewModel
+                cartViewModel = cartViewModel,
+                authViewModel = authViewModel
             )
         }
 
@@ -212,7 +223,10 @@ fun AppNavGraph(
         }
         composable("settings") {
             SettingsScreen(
-                settingsViewModel, innerPadding = contentPadding, navController = navController
+                settingsViewModel,
+                innerPadding = contentPadding,
+                authViewModel = authViewModel,
+                navController = navController
             )
         }
 
@@ -224,10 +238,39 @@ fun AppNavGraph(
             )
         }
 
+        composable(
+            route = "login?returnTo={returnTo}", arguments = listOf(navArgument("returnTo") {
+                type = NavType.StringType
+                defaultValue = BottomNavItem.Feed.route
+            })
+        ) { backStackEntry ->
+            val returnTo =
+                backStackEntry.arguments?.getString("returnTo") ?: BottomNavItem.Feed.route
+            LoginScreen(
+                navController = navController, authViewModel = authViewModel, returnTo = returnTo
+            )
+        }
 
+        composable(
+            route = "signup?returnTo={returnTo}", arguments = listOf(navArgument("returnTo") {
+                type = NavType.StringType
+                defaultValue = BottomNavItem.Farm.route
+            })
+        ) { backStackEntry ->
+            val returnTo =
+                backStackEntry.arguments?.getString("returnTo") ?: BottomNavItem.Farm.route
+            SignupScreen(
+                navController = navController, authViewModel = authViewModel, returnTo = returnTo
+            )
+        }
+
+        composable("authGate") {
+            AuthGateScreen(
+                navController = navController, authViewModel = authViewModel
+            )
+        }
     }
 }
-
 
 @Composable
 fun BottomBar(

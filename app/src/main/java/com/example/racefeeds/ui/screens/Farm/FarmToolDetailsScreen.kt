@@ -1,27 +1,18 @@
 package com.example.racefeeds.ui.screens.Farm
 
-import android.content.res.Resources
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,12 +35,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.racefeeds.R
-import com.example.racefeeds.ui.Components.ToolCard
 import com.example.racefeeds.ui.screens.Cart.CartViewModel
 import kotlinx.coroutines.launch
 
@@ -59,7 +48,7 @@ fun FarmToolDetailsScreen(
     toolId: String,
     farmSupplyViewModel: FarmSupplyViewModel = remember { FarmSupplyViewModel() },
     cartViewModel: CartViewModel = remember { CartViewModel() },
-    navController: NavController
+    navController: NavController,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -75,20 +64,17 @@ fun FarmToolDetailsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Tool Details") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        },
+        TopAppBar(title = { Text("Tool Details") }, navigationIcon = {
+            IconButton(onClick = { navController.navigateUp() }) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            }
+        })
+    },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         contentWindowInsets = WindowInsets.systemBars
     ) { innerPadding ->
 
-    when (tool) {
+        when (tool) {
             is ToolUiState.Loading -> {
                 Box(
                     modifier = Modifier
@@ -146,13 +132,15 @@ fun FarmToolDetailsScreen(
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(text = currentTool.description, style = MaterialTheme.typography.bodyLarge)
-                    Text(text = "KSh ${currentTool.price}", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = "KSh ${currentTool.price}",
+                        style = MaterialTheme.typography.titleMedium
+                    )
 
                     Button(
                         onClick = {
                             cartViewModel.addToCart(
-                                itemName = currentTool.name,
-                                price = currentTool.price
+                                itemName = currentTool.name, price = currentTool.price
                             )
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar(
@@ -160,8 +148,7 @@ fun FarmToolDetailsScreen(
                                     duration = SnackbarDuration.Short
                                 )
                             }
-                        },
-                        modifier = Modifier.fillMaxWidth()
+                        }, modifier = Modifier.fillMaxWidth()
                     ) {
                         Text("Add to Cart")
                     }

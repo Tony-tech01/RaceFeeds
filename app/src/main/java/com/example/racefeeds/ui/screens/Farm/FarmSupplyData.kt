@@ -18,7 +18,7 @@ object FarmSupplyData {
 
         FarmTool("10", "Slasher", R.drawable.slasher, 450.0, "Handheld slasher for clearing grass and weeds.", "Tools"),
 
-        FarmTool("11", "Sprayer", R.drawable.sprayer, 1700.0, "Manual sprayer for applying feeds and pesticides.", "Tools"),
+
         FarmTool("12", "Sprayer Variant 1", R.drawable.sprayer_1, 1650.0, "Compact sprayer for light-duty tasks.", "Tools"),
         FarmTool("13", "Sprayer Variant 2", R.drawable.sprayer_2, 1750.0, "High-pressure sprayer for dense coverage.", "Tools"),
         FarmTool("14", "Sprayer Variant 3", R.drawable.sprayer_3, 1780.0, "Dual nozzle sprayer with long reach.", "Tools"),

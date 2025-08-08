@@ -9,13 +9,16 @@ import com.example.racefeeds.ui.screens.OrderHistory.OrderRepository
 class SharedViewModelFactory(
     private val orderRepository: OrderRepository
 ) : ViewModelProvider.Factory {
+
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
-            modelClass.isAssignableFrom(OrderHistoryViewModel::class.java) ->
-                OrderHistoryViewModel(orderRepository) as T
-            modelClass.isAssignableFrom(CheckoutViewModel::class.java) ->
+            modelClass.isAssignableFrom(CheckoutViewModel::class.java) -> {
                 CheckoutViewModel(orderRepository) as T
-            else -> throw IllegalArgumentException("Unknown ViewModel class")
+            }
+            modelClass.isAssignableFrom(OrderHistoryViewModel::class.java) -> {
+                OrderHistoryViewModel(orderRepository) as T
+            }
+            else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }
     }
 }

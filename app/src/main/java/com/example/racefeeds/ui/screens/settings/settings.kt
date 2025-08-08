@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -26,20 +29,46 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
+import com.example.racefeeds.data.BottomNavItem
+import com.example.racefeeds.ui.screens.firebase.AuthViewModel
 
 @Composable
-fun SettingsScreen(settingsViewModel: SettingsViewModel, innerPadding: PaddingValues,navController: NavController ) {
+fun SettingsScreen(
+    settingsViewModel: SettingsViewModel,
+    authViewModel: AuthViewModel,
+    innerPadding: PaddingValues,
+    navController: NavController
+) {
     val isDarkMode by settingsViewModel.isDarkMode.collectAsState()
     val notificationsEnabled by settingsViewModel.notificationsEnabled.collectAsState()
+    val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(innerPadding)
-        .padding(start = 8.dp, end = 8.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+            .padding(start = 8.dp, end = 8.dp)
     ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween
+        ){
+            Text("Settings", style = MaterialTheme.typography.headlineMedium)
+            ListItem(
+                headlineContent = { Text("Home") },
+                leadingContent = {
+                    Icon(
+                        imageVector = Icons.Default.Home,
+                        contentDescription = "Home"
+                    )
+                },
+                modifier = Modifier.clickable {
+                    navController.navigate(BottomNavItem.Feed.route)
+                }
+            )
 
-        Text("Settings", style = MaterialTheme.typography.headlineMedium)
-
+        }
         Spacer(modifier = Modifier.height(24.dp))
 
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -50,18 +79,12 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel, innerPadding: PaddingVa
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text("Account", modifier = Modifier.weight(1f))
-            TextButton(onClick = { }) {
-                Text("Manage")
-            }
+            Text("Notifications", modifier = Modifier.weight(1f))
+            Switch(checked = notificationsEnabled, onCheckedChange = settingsViewModel::toggleNotifications)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text("Notifications", modifier = Modifier.weight(1f))
-            Switch(checked = notificationsEnabled, onCheckedChange = settingsViewModel::toggleNotifications)
-        }
         ListItem(
             headlineContent = { Text("Order History") },
             leadingContent = {
@@ -75,6 +98,43 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel, innerPadding: PaddingVa
             }
         )
 
+        Spacer(modifier = Modifier.height(32.dp))
 
+        Text("Authentication", style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (isAuthenticated) {
+            Button(
+                onClick = {
+                    authViewModel.signOut()
+                    navController.navigate("login?returnTo=settings")
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Sign Out")
+            }
+        } else {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = {
+                        navController.navigate("login?returnTo=settings")
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Sign In")
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Button(
+                    onClick = {
+                        navController.navigate("signup?returnTo=settings")
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Sign Up")
+                }
+            }
+        }
     }
 }

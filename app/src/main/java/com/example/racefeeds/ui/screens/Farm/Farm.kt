@@ -70,12 +70,11 @@ fun FarmScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = {navController.navigate("settings")}){
+                    IconButton(onClick = { navController.navigate("settings") }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Settings"
                         )
-
                     }
                 },
                 modifier = Modifier.statusBarsPadding(),
@@ -128,8 +127,7 @@ fun FarmScreen(
                         modifier = Modifier
                             .padding(end = 12.dp)
                             .background(
-                                color = highlightColor,
-                                shape = RoundedCornerShape(20.dp)
+                                color = highlightColor, shape = RoundedCornerShape(20.dp)
                             )
                             .border(
                                 width = if (isSelected) 2.dp else 0.dp,

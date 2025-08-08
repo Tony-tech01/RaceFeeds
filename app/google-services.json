@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "193847733558",
+    "project_id": "racefeeds-61137",
+    "storage_bucket": "racefeeds-61137.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:193847733558:android:1a498f1eb5d64df21ed797",
+        "android_client_info": {
+          "package_name": "com.example.racefeeds"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOt2OkMVl0JSUdXCSijGYtttIYPbj2Cg4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
