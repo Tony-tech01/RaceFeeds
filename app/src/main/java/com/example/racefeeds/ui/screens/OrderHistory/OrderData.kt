@@ -1,14 +1,14 @@
-package com.example.racefeeds.ui.screens.OrderHistory
-
 import com.example.racefeeds.ui.screens.Cart.CartItem
-import org.threeten.bp.LocalDateTime
-
+import com.google.firebase.Timestamp
 
 data class Order(
-    val id: String,
-    val items: List<CartItem>,
-    val status: OrderStatus,
-    val date: LocalDateTime,
+    val orderId: String = "",
+    val userId: String = "",
+    val userEmail: String = "",
+    val items: List<CartItem> = emptyList(),
+    val status: OrderStatus = OrderStatus.PENDING,
+    val date: Timestamp? = null
+,
     val trackingInfo: TrackingInfo? = null
 )
 
@@ -17,7 +17,7 @@ enum class OrderStatus {
 }
 
 data class TrackingInfo(
-    val currentLocation: String,
-    val estimatedDelivery: LocalDateTime,
-    val progress: Float
+    val currentLocation: String = "",
+    val estimatedDelivery: Timestamp? = null,
+    val progress: Float = 0f
 )

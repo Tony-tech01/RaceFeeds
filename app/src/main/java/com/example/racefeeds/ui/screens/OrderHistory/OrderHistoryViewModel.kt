@@ -1,7 +1,11 @@
 package com.example.racefeeds.ui.screens.OrderHistory
 
+import Order
+import OrderStatus
+import TrackingInfo
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.example.racefeeds.data.repository.OrderRepository
+
 import kotlinx.coroutines.flow.StateFlow
 
 class OrderHistoryViewModel(private val repository: OrderRepository) : ViewModel() {
@@ -14,4 +18,13 @@ class OrderHistoryViewModel(private val repository: OrderRepository) : ViewModel
 
     fun updateTracking(orderId: String, trackingInfo: TrackingInfo) =
         repository.updateTracking(orderId, trackingInfo)
+
+    fun loadOrdersForUser(userId: String) {
+        repository.fetchOrdersForUser(userId)
+    }
+
+    fun loadAllOrdersForAdmin() {
+        repository.loadAllOrdersForAdmin()
+    }
+
 }

@@ -12,8 +12,8 @@ data class CheckoutUiState(
     val isOrderPlaced: Boolean = false,
     val isWaitingForPayment: Boolean = false,
     val isProcessingPayment: Boolean = false,
-    val checkoutRequestId: String? = null
-
+    val checkoutRequestId: String? = null,
+    val userEmail: String = ""
 ){
     val totalPrice: Double
         get() = cartItems.sumOf { it.price * it.quantity }

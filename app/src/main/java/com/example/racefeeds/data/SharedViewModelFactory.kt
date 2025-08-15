@@ -1,10 +1,12 @@
 package com.example.racefeeds.data
 
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.racefeeds.data.repository.OrderRepository
 import com.example.racefeeds.ui.screens.Checkout.CheckoutViewModel
 import com.example.racefeeds.ui.screens.OrderHistory.OrderHistoryViewModel
-import com.example.racefeeds.ui.screens.OrderHistory.OrderRepository
+
 
 class SharedViewModelFactory(
     private val orderRepository: OrderRepository

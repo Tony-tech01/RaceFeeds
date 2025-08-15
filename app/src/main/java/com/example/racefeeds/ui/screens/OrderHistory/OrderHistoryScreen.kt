@@ -1,5 +1,6 @@
 package com.example.racefeeds.ui.screens.OrderHistory
 
+import Order
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
@@ -32,6 +33,7 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,45 +45,60 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import org.threeten.bp.format.DateTimeFormatter
+import com.example.racefeeds.ui.screens.firebase.AuthViewModel
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun OrderHistoryScreen(
     navController: NavController,
     orderHistoryViewModel: OrderHistoryViewModel,
+    authViewModel: AuthViewModel,
     innerPadding: PaddingValues,
 ) {
     val orders by orderHistoryViewModel.orders.collectAsState()
-    val categories = listOf("Pending", "Completed", "Cancelled")
+
+
     var selectedCategory by rememberSaveable { mutableStateOf("Pending") }
 
-    val filteredOrders = orders.filter {
-        it.status.name.equals(selectedCategory, ignoreCase = true)
+    val filteredOrders by remember(orders, selectedCategory) {
+        mutableStateOf(
+            orders.filter {
+                it.status.name.equals(selectedCategory, ignoreCase = true)
+            })
     }
+
+    val userIdState = authViewModel.userId.collectAsState(initial = null)
+    val userId = userIdState.value
+    LaunchedEffect(userId) {
+        userId?.let { uid ->
+            orderHistoryViewModel.loadOrdersForUser(uid)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
     ) {
         CategoryTabRow(
-            categories = categories,
+            categories = listOf("Pending", "Completed", "Cancelled"),
             selectedCategory = selectedCategory,
             onCategorySelected = { selectedCategory = it })
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (orders.isEmpty()) {
-            EmptyState("No orders found.")
-        } else if (filteredOrders.isEmpty()) {
-            EmptyState("No ${selectedCategory.lowercase()} orders found.")
-        } else {
-            LazyColumn(
+        when {
+            orders.isEmpty() -> EmptyState("No orders found.")
+            filteredOrders.isEmpty() -> EmptyState("No ${selectedCategory.lowercase()} orders found.")
+            else -> LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp)
                     .animateContentSize()
             ) {
-                itemsIndexed(filteredOrders) { _, order ->
+                itemsIndexed(filteredOrders, key = { _, order -> order.orderId }) { _, order ->
                     OrderCard(order)
                 }
             }
@@ -108,9 +125,7 @@ private fun CategoryTabRow(
         indicator = { tabPositions ->
             TabRowDefaults.Indicator(
                 modifier = Modifier.tabIndicatorOffset(
-                    tabPositions[categories.indexOf(
-                        selectedCategory
-                    )]
+                    tabPositions[categories.indexOf(selectedCategory)]
                 ), color = MaterialTheme.colorScheme.primary, height = 3.dp
             )
         }) {
@@ -146,11 +161,26 @@ private fun EmptyState(message: String) {
 
 @Composable
 private fun OrderCard(order: Order) {
-    val dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
+    remember {
+        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault()).apply {
+            timeZone = java.util.TimeZone.getTimeZone("UTC")
+        }
+    }
+
+
     var expanded by remember { mutableStateOf(false) }
     val totalPrice = order.items.sumOf { it.price * it.quantity }
 
-
+    fun formatTimestamp(timestamp: Timestamp?): String {
+        return try {
+            val sdf =
+                SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
+            sdf.timeZone = java.util.TimeZone.getDefault()
+            sdf.format(timestamp?.toDate())
+        } catch (e: Exception) {
+            "Invalid date"
+        }
+    }
 
     Card(
         modifier = Modifier
@@ -163,26 +193,23 @@ private fun OrderCard(order: Order) {
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
-
         Column(modifier = Modifier.padding(16.dp)) {
-
             Row(
                 modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Order #${order.id}",
+                    text = "Order #${order.orderId}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = order.date?.format(dateFormatter) ?: "Unknown",
+                    text = formatTimestamp(order.date),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-
 
             Text(
                 text = "Status: ${
@@ -198,7 +225,6 @@ private fun OrderCard(order: Order) {
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-
 
             AnimatedVisibility(visible = expanded) {
                 Column(modifier = Modifier.padding(top = 12.dp)) {
@@ -218,5 +244,4 @@ private fun OrderCard(order: Order) {
             }
         }
     }
-
 }

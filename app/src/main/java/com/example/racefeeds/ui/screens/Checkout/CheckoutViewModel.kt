@@ -1,18 +1,20 @@
 package com.example.racefeeds.ui.screens.Checkout
 
+
+import Order
+
+import OrderStatus
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.racefeeds.data.repository.OrderRepository
 import com.example.racefeeds.ui.screens.Cart.CartItem
-import com.example.racefeeds.ui.screens.OrderHistory.Order
-import com.example.racefeeds.ui.screens.OrderHistory.OrderRepository
-import com.example.racefeeds.ui.screens.OrderHistory.OrderStatus
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.threeten.bp.LocalDateTime
-
 
 class CheckoutViewModel(
     private val orderRepository: OrderRepository,
@@ -30,7 +32,11 @@ class CheckoutViewModel(
     }
 
     fun onPaymentOptionSelected(option: PaymentOption?) {
-        _uiState.value = _uiState.value.copy(paymentOption = option)
+        _uiState.update { it.copy(paymentOption = option) }
+    }
+
+    fun setUserEmail(email: String) {
+        _uiState.update { it.copy(userEmail = email) }
     }
 
     private fun generateOrderId(): String {
@@ -50,22 +56,26 @@ class CheckoutViewModel(
             return
         }
 
+
+
         viewModelScope.launch {
             _uiState.update {
                 it.copy(
-                    isProcessingPayment = true,
-                    errorMessage = null,
-                    showConfirmationDialog = true
+                    isProcessingPayment = true, errorMessage = null, showConfirmationDialog = true
                 )
             }
 
             kotlinx.coroutines.delay(1000)
 
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
+
             val newOrder = Order(
-                id = generateOrderId(),
+                orderId = generateOrderId(),
+                userId = uid,
+                userEmail = state.userEmail,
                 items = state.cartItems,
                 status = OrderStatus.PENDING,
-                date = LocalDateTime.now(),
+                date = getFormattedDate(),
                 trackingInfo = null
             )
 
@@ -84,17 +94,34 @@ class CheckoutViewModel(
         }
     }
 
+    fun getFormattedDate(): Timestamp {
+        return Timestamp.now()
+    }
+
+
     fun confirmOrder() {
         val state = _uiState.value
 
+        if (state.userEmail.isBlank()) {
+            showError("User email is missing")
+            return
+        }
+
+
+
         viewModelScope.launch {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
+
             val newOrder = Order(
-                id = generateOrderId(),
+                orderId = generateOrderId(),
+                userId = uid,
+                userEmail = state.userEmail,
                 items = state.cartItems,
                 status = OrderStatus.PENDING,
-                date = LocalDateTime.now(),
+                date = getFormattedDate(),
                 trackingInfo = null
             )
+
 
             orderRepository.addOrder(newOrder)
 

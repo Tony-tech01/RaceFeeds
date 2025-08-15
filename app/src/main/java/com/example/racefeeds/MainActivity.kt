@@ -1,6 +1,7 @@
 package com.example.racefeeds
 
 
+
 import com.example.racefeeds.data.SharedViewModelFactory
 import android.app.Activity
 import android.os.Bundle
@@ -30,12 +31,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.racefeeds.data.BottomNavItem
+import com.example.racefeeds.data.repository.OrderRepository
 import com.example.racefeeds.ui.Components.AppNavGraph
 import com.example.racefeeds.ui.Components.BottomBar
 import com.example.racefeeds.ui.screens.Cart.CartViewModel
 import com.example.racefeeds.ui.screens.Checkout.CheckoutViewModel
 import com.example.racefeeds.ui.screens.OrderHistory.OrderHistoryViewModel
-import com.example.racefeeds.ui.screens.OrderHistory.OrderRepository
 import com.example.racefeeds.ui.screens.firebase.AuthViewModel
 import com.example.racefeeds.ui.screens.firebase.AuthViewModelFactory
 import com.example.racefeeds.ui.screens.settings.SettingsViewModel
@@ -78,18 +79,19 @@ class MainActivity : ComponentActivity() {
 
             val isDarkMode by settingsViewModel.isDarkMode.collectAsState()
             val navController = rememberNavController()
-            LaunchedEffect(Unit) {
-                Log.d("MainActivity", "Navigating to FarmScreen")
-                navController.navigate(BottomNavItem.Feed.route)
-            }
+
             val navBackStackEntry = navController.currentBackStackEntryAsState()
             val currentDestination = navBackStackEntry.value?.destination
-            val orderRepository = remember { OrderRepository() }
+
+            val firestore = remember { com.google.firebase.firestore.FirebaseFirestore.getInstance() }
+            val orderRepository = remember { OrderRepository(firestore = firestore) }
 
             val sharedFactory = remember { SharedViewModelFactory(orderRepository) }
             val checkoutViewModel: CheckoutViewModel = viewModel(factory = sharedFactory)
+
             val orderHistoryViewModel: OrderHistoryViewModel = viewModel(factory = sharedFactory)
             val view = LocalView.current
+
             val window = (view.context as Activity).window
             SideEffect {
                 window.statusBarColor = Color.Transparent.toArgb()

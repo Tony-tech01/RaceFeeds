@@ -47,16 +47,10 @@ android {
 }
 
 dependencies {
-    implementation(libs.mpesa.stk.push)
-    implementation(libs.retrofit.v300)
-    implementation(libs.converter.moshi)
-    implementation(libs.logging.interceptor.v4120)
-    implementation(libs.moshi)
-    implementation(libs.moshi.kotlin)
-    implementation(libs.firebase.bom.v3270)
+
+    implementation(platform(libs.firebase.bom.v3270))
     implementation(libs.com.google.firebase.firebase.auth.ktx)
     implementation(libs.google.firebase.firestore.ktx)
-    ksp(libs.moshi.kotlin.codegen)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.navigation.compose)
@@ -79,3 +73,4 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
+apply(plugin = "com.google.gms.google-services")

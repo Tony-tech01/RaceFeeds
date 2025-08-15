@@ -66,6 +66,8 @@ import com.example.racefeeds.ui.screens.Farm.FarmScreen
 import com.example.racefeeds.ui.screens.Farm.FarmToolDetailsScreen
 import com.example.racefeeds.ui.screens.OrderHistory.OrderHistoryScreen
 import com.example.racefeeds.ui.screens.OrderHistory.OrderHistoryViewModel
+import com.example.racefeeds.ui.screens.admin.AccessDeniedScreen
+import com.example.racefeeds.ui.screens.admin.AdminScreen
 import com.example.racefeeds.ui.screens.firebase.AuthGateScreen
 import com.example.racefeeds.ui.screens.firebase.AuthViewModel
 import com.example.racefeeds.ui.screens.firebase.LoginScreen
@@ -234,7 +236,8 @@ fun AppNavGraph(
             OrderHistoryScreen(
                 navController = navController,
                 orderHistoryViewModel = orderHistoryViewModel,
-                innerPadding = contentPadding
+                innerPadding = contentPadding,
+                authViewModel = authViewModel
             )
         }
 
@@ -269,6 +272,15 @@ fun AppNavGraph(
                 navController = navController, authViewModel = authViewModel
             )
         }
+
+        composable("admin") {
+
+                AdminScreen(
+                    orderHistoryViewModel = orderHistoryViewModel,
+                    navController = navController,
+                    innerPadding = contentPadding
+                )
+            }
     }
 }
 
