@@ -169,12 +169,9 @@ class AnimalViewModel : ViewModel() {
     }
 
 
-    fun closeBreedSheet() {
+    fun closeFoodInfo() {
         _uiState.update {
             it.copy(
-                isBreedSheetVisible = false,
-                selectedAnimal = null,
-                selectedBreed = null,
                 foodInfo = null,
                 errorMessage = null
             )

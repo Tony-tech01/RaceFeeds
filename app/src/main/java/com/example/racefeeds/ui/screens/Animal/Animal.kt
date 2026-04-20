@@ -1,5 +1,7 @@
 package com.example.racefeeds.ui.screens.Animal
 
+import androidx.annotation.DrawableRes
+
 data class Animal(
     val name: String,
     val image: Int,
@@ -20,7 +22,9 @@ data class FoodInfo(
 
 data class FoodItem(
     val name: String,
-    val price: Double
+    val price: Double,
+    val description: String = "",
+    @DrawableRes val imageRes: Int
 
 )
 

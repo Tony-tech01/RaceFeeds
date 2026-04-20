@@ -8,15 +8,20 @@ sealed class BottomNavItem(
     @DrawableRes val iconRes: Int,
     val label: String
 ) {
+    object Home : BottomNavItem(
+        route = "home",
+        iconRes = R.drawable.home,
+        label = "Home"
+    )
     object Feed : BottomNavItem(
         route = "feeds",
         iconRes = R.drawable.food,
         label = "Feeds"
     )
-    object Farm : BottomNavItem(
+    object Tool : BottomNavItem(
         route = "farm",
         iconRes =  R.drawable.agriculture,
-        label = "Animal"
+        label = "Tools"
     )
     object Cart: BottomNavItem(
         route = "cart",

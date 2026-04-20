@@ -91,7 +91,7 @@ fun SearchBar(
         placeholder = { Text(placeholder) },
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 12.dp),
         singleLine = true,
         shape = RoundedCornerShape(16.dp),
         leadingIcon = {
@@ -149,11 +149,11 @@ fun CartIconWithBadge(cartCount: Int, onCartClick: () -> Unit) {
                     .align(Alignment.TopEnd)
                     .padding(top = 4.dp, end = 4.dp)
                     .size(16.dp)
-                    .background(MaterialTheme.colorScheme.primary, CircleShape),
+                    .background(Color.Red, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = cartCount.toString(), color = Color.Yellow, fontSize = 10.sp
+                    text = cartCount.toString(), color = Color.White, fontSize = 10.sp, modifier = Modifier.background(Color.Transparent)
                 )
             }
         }
@@ -195,7 +195,7 @@ fun AppNavGraph(
             )
         }
 
-        composable(BottomNavItem.Farm.route) {
+        composable(BottomNavItem.Tool.route) {
             FarmScreen(
                 cartViewModel = cartViewModel,
                 navController = navController,
@@ -244,11 +244,11 @@ fun AppNavGraph(
         composable(
             route = "login?returnTo={returnTo}", arguments = listOf(navArgument("returnTo") {
                 type = NavType.StringType
-                defaultValue = BottomNavItem.Feed.route
+                defaultValue = BottomNavItem.Home.route
             })
         ) { backStackEntry ->
             val returnTo =
-                backStackEntry.arguments?.getString("returnTo") ?: BottomNavItem.Feed.route
+                backStackEntry.arguments?.getString("returnTo") ?: BottomNavItem.Home.route
             LoginScreen(
                 navController = navController, authViewModel = authViewModel, returnTo = returnTo
             )
@@ -257,11 +257,11 @@ fun AppNavGraph(
         composable(
             route = "signup?returnTo={returnTo}", arguments = listOf(navArgument("returnTo") {
                 type = NavType.StringType
-                defaultValue = BottomNavItem.Farm.route
+                defaultValue = BottomNavItem.Tool.route
             })
         ) { backStackEntry ->
             val returnTo =
-                backStackEntry.arguments?.getString("returnTo") ?: BottomNavItem.Farm.route
+                backStackEntry.arguments?.getString("returnTo") ?: BottomNavItem.Tool.route
             SignupScreen(
                 navController = navController, authViewModel = authViewModel, returnTo = returnTo
             )
@@ -290,7 +290,7 @@ fun BottomBar(
     currentDestination: NavDestination?,
 ) {
     val items = listOf(
-        BottomNavItem.Feed, BottomNavItem.Farm, BottomNavItem.Cart
+        BottomNavItem.Feed, BottomNavItem.Tool, BottomNavItem.Cart, BottomNavItem.Home
     )
     val cartViewModel: CartViewModel = viewModel()
     val cartCount by cartViewModel.cartCount.collectAsState()

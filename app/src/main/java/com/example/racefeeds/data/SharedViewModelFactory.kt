@@ -8,7 +8,8 @@ import com.example.racefeeds.ui.screens.Checkout.CheckoutViewModel
 import com.example.racefeeds.ui.screens.OrderHistory.OrderHistoryViewModel
 
 
-class SharedViewModelFactory(
+class
+SharedViewModelFactory(
     private val orderRepository: OrderRepository
 ) : ViewModelProvider.Factory {
 

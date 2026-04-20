@@ -1,5 +1,7 @@
 package com.example.racefeeds.ui.screens.Animal
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,8 +19,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -40,12 +44,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.racefeeds.R
 import com.example.racefeeds.ui.Components.HeadWithSeeAll
 import com.example.racefeeds.ui.Components.ScreenTitleWithCart
 import com.example.racefeeds.ui.Components.SearchBar
@@ -72,146 +78,154 @@ fun FarmPage(
             CenterAlignedTopAppBar(
                 title = {
                 Text(
-                    "Race Feeds",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 32.sp
+                    "Race Feeds", style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp
+                    )
                 )
             },
                 actions = {
                     IconButton(onClick = { navController.navigate("settings") }) {
                         Icon(
-                            imageVector = Icons.Default.Settings, contentDescription = "Settings"
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                 },
                 modifier = Modifier.statusBarsPadding(),
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = colorResource(id = R.color.deep_green),
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
+                    actionIconContentColor = Color.White
                 )
             )
         }) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize()
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            item {
+                ScreenTitleWithCart(
+                    title = "Animal Feeds",
+                    cartCount = cartCount,
+                    onNavigateToCart = onNavigateToCart
+                )
+            }
 
+            item {
+                SearchBar(
+                    query = uiState.searchQuery,
+                    onQueryChange = animalViewModel::onSearchQueryChanged,
+                    placeholder = "Search for animal feeds",
+                    onSearchTriggered = {
+                        focusManager.clearFocus()
+                        keyboardController?.hide()
+                    })
+            }
 
-            ScreenTitleWithCart(
-                title = "Animal Feeds", cartCount = cartCount, onNavigateToCart = onNavigateToCart
-            )
-
-            SearchBar(
-                query = uiState.searchQuery,
-                onQueryChange = animalViewModel::onSearchQueryChanged,
-                placeholder = "Search for animal feeds",
-                onSearchTriggered = {
-                    focusManager.clearFocus()
-                    keyboardController?.hide()
-                })
 
             if (uiState.matchingFeedsWithContext.isNotEmpty()) {
-                Text(
-                    text = "Search Results:",
-                    modifier = Modifier.padding(start = 12.dp, top = 8.dp),
-                    style = MaterialTheme.typography.titleMedium
-                )
+                item {
+                    Text(
+                        text = "Search Results:",
+                        modifier = Modifier.padding(start = 12.dp, top = 8.dp),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
 
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(uiState.matchingFeedsWithContext) { context ->
-                        Card(
+
+                items(uiState.matchingFeedsWithContext) { context ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp)
+                            .clickable {
+                                animalViewModel.onFeedSelected(
+                                    feedItem = context.feedItem,
+                                    breed = context.breed,
+                                    animal = context.animal
+                                )
+                            }, shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer
+                        )
+                    ) {
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable {
-                                    animalViewModel.onFeedSelected(
-                                        feedItem = context.feedItem,
-                                        breed = context.breed,
-                                        animal = context.animal
-                                    )
-                                },
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                                .padding(8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(modifier = Modifier.padding(8.dp)) {
-                                    Text(
-                                        "Feed: ${context.feedItem.name}",
-                                        style = MaterialTheme.typography.bodyLarge
-                                    )
-                                    Text(
-                                        "Breed: ${context.breed?.name ?: "General"}",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        modifier = Modifier.padding(vertical = 4.dp)
-                                    )
-                                    Text(
-                                        "Animal: ${context.animal.name}",
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                                Text(
-                                    "Price: KES ${context.feedItem.price}",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
+                            Column {
+                                Text("Feed: ${context.feedItem.name}")
+                                Text("Breed: ${context.breed?.name ?: "General"}")
+                                Text("Animal: ${context.animal.name}")
                             }
+                            Text(
+                                "Price: KES ${context.feedItem.price}"
+                            )
+                        }
+                    }
+                }
+
+            }
+
+            item {
+                HeadWithSeeAll(title = "Animal Categories")
+            }
+
+
+
+
+            item {
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(uiState.displayedAnimals) { animal ->
+                        val isSelected = animal == uiState.selectedAnimal
+//                        val scale by animateFloatAsState(targetValue = if (isSelected) 1.05f else 1f)
+
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(
+                                    if (isSelected) MaterialTheme.colorScheme.secondaryContainer
+                                    else Color.LightGray.copy(alpha = 0.3f)
+                                )
+                               .border(
+                                    width = if (isSelected) 2.dp else 0.dp,
+                                    color = if (isSelected) colorResource(id = R.color.deep_green) else Color.Transparent,
+                                    shape = RoundedCornerShape(14.dp)
+                                )
+                                .clickable { animalViewModel.onAnimalSelected(animal) }
+                                .padding(8.dp),
+
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                            ) {
+                            Image(
+                                painter = painterResource(id = animal.image),
+                                contentDescription = animal.name,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(30.dp)
+                                    .clip(RoundedCornerShape(14.dp))
+                            )
+                            Text(
+                                text = animal.name,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                modifier = Modifier.padding(end = 4.dp)
+                            )
                         }
                     }
                 }
             }
 
-            HeadWithSeeAll(title = "Animal Categories")
-
-
-
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(uiState.displayedAnimals) { animal ->
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Color.LightGray.copy(alpha = 0.3f))
-                            .clickable {
-                                animalViewModel.onAnimalSelected(animal)
-                            }
-                            .padding(8.dp),
-                    ) {
-                        Image(
-                            painter = painterResource(id = animal.image),
-                            contentDescription = animal.name,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(80.dp)
-                                .clip(RoundedCornerShape(14.dp))
-                        )
-                        Text(
-                            text = animal.name,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(end = 4.dp)
-                        )
-                    }
-                }
-            }
 
 
 
@@ -219,58 +233,60 @@ fun FarmPage(
 
             uiState.selectedAnimal?.let { animal ->
                 if (animal.breeds.isNotEmpty()) {
-                    Text(
-                        text = "Select Breed:",
-                        modifier = Modifier.padding(start = 12.dp),
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    item {
+                        Text(
+                            text = "Select Breed:",
+                            modifier = Modifier.padding(start = 12.dp),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
 
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(animal.breeds) { breed ->
-                            val isSelected = breed == uiState.selectedBreed
-                            val highlightColor = if (isSelected) {
-                                MaterialTheme.colorScheme.secondaryContainer
-                            } else {
-                                Color.Transparent
-                            }
+                    item {
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(animal.breeds) { breed ->
+                                val isSelected = breed == uiState.selectedBreed
+                                if (isSelected) {
+                                    MaterialTheme.colorScheme.secondaryContainer
+                                } else {
+                                    Color.Transparent
+                                }
 
-                            Card(modifier = Modifier
-                                .clickable {
-                                    animalViewModel.onBreedSelected(
-                                        breed
+                                Card(
+                                    modifier = Modifier.clickable {
+                                        animalViewModel.onBreedSelected(breed)
+                                    }
+                                        .border(
+                                        width = if (isSelected) 2.dp else 0.dp,
+                                        color = if (isSelected) colorResource(id = R.color.deep_green) else Color.Transparent,
+                                        shape = RoundedCornerShape(14.dp)
+                                    ),
+                                    shape = RoundedCornerShape(20.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = if (isSelected) MaterialTheme.colorScheme.secondaryContainer
+                                        else MaterialTheme.colorScheme.surface
+                                    ),
+                                    elevation = CardDefaults.cardElevation(
+                                        defaultElevation = if (isSelected) 6.dp else 2.dp
+                                    )
+                                ) {
+
+                                    Text(
+                                        text = breed.name,
+                                        modifier = Modifier.padding(12.dp),
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                     )
                                 }
-                                .background(
-                                    color = if (isSelected) highlightColor else MaterialTheme.colorScheme.surface,
-                                    shape = RoundedCornerShape(20.dp)
-                                )
-                                .border(
-                                    width = if (isSelected) 2.dp else 1.dp,
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-                                    shape = RoundedCornerShape(20.dp)
-                                )
-                                .padding(vertical = 8.dp, horizontal = 12.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 6.dp else 2.dp)) {
-
-                                Text(
-                                    text = breed.name,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary
-                                        else MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                )
                             }
-                        }
 
+                        }
                     }
+
+
                 }
             }
 
@@ -279,71 +295,74 @@ fun FarmPage(
 
             uiState.foodInfo?.let { foodInfo ->
 
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    Text(text = uiState.selectedBreed?.let { "Food Info for ${it.name}" }
-                        ?: uiState.selectedAnimal?.let { "Food Info for ${it.name}" }
-                        ?: "Food Info", style = MaterialTheme.typography.titleMedium)
-
-
-                    Button(
-                        onClick = { animalViewModel.closeBreedSheet() },
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "Close")
+
+                        Text(text = uiState.selectedBreed?.let { "Food Info for ${it.name}" }
+                            ?: uiState.selectedAnimal?.let { "Food Info for ${it.name}" }
+                            ?: "Food Info", style = MaterialTheme.typography.titleLarge)
+
+
+                        Button(
+                            onClick = { animalViewModel.closeFoodInfo() },
+                        ) {
+                            Text(text = "Close")
+                        }
                     }
                 }
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = 90.dp, top = 16.dp, start = 16.dp, end = 16.dp)
-                ) {
-                    items(foodInfo.items) { foodItem ->
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
+
+                items(foodInfo.items) { foodItem ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                            Column {
+                                Text(
+                                    text = foodItem.name,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "Price: KES ${foodItem.price} per Kg",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Button(
+                                onClick = {
+                                    cartViewModel.addToCart(
+                                        foodItem.name, foodItem.price
+                                    )
+                                }, shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = colorResource(id = R.color.orange),
+                                    contentColor = Color.White
+                                )
                             ) {
-                                Column {
-                                    Text(
-                                        text = foodItem.name,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = "Price: KES ${foodItem.price} per Kg",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                Row{
+                                    Icon(Icons.Default.Add, contentDescription = null)
+                                    Text("Add")
                                 }
-                                Button(
-                                    onClick = {
-                                        cartViewModel.addToCart(
-                                            foodItem.name, foodItem.price
-                                        )
-                                    }, shape = RoundedCornerShape(12.dp)
-                                ) {
-                                    Text("Add to Cart")
-                                }
+
                             }
                         }
-
                     }
 
                 }
@@ -353,13 +372,16 @@ fun FarmPage(
 
 
             uiState.errorMessage?.let { error ->
-                LaunchedEffect(error) {
-                    kotlinx.coroutines.delay(3000)
-                    animalViewModel.clearErrorMessage()
+                item {
+                    LaunchedEffect(error) {
+                        kotlinx.coroutines.delay(3000)
+                        animalViewModel.clearErrorMessage()
+                    }
+                    Text(
+                        text = error, color = Color.Red, modifier = Modifier.padding(16.dp)
+                    )
                 }
-                Text(
-                    text = error, color = Color.Red, modifier = Modifier.padding(16.dp)
-                )
+
             }
         }
     }
