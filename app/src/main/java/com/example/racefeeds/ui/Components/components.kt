@@ -57,7 +57,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.racefeeds.R
 import com.example.racefeeds.data.BottomNavItem
-import com.example.racefeeds.ui.screens.Animal.FarmPage
+import com.example.racefeeds.ui.screens.animal.FarmPage
 import com.example.racefeeds.ui.screens.Cart.CartScreen
 import com.example.racefeeds.ui.screens.Cart.CartViewModel
 import com.example.racefeeds.ui.screens.Checkout.CheckoutScreen
@@ -66,12 +66,12 @@ import com.example.racefeeds.ui.screens.Farm.FarmScreen
 import com.example.racefeeds.ui.screens.Farm.FarmToolDetailsScreen
 import com.example.racefeeds.ui.screens.OrderHistory.OrderHistoryScreen
 import com.example.racefeeds.ui.screens.OrderHistory.OrderHistoryViewModel
-import com.example.racefeeds.ui.screens.admin.AccessDeniedScreen
 import com.example.racefeeds.ui.screens.admin.AdminScreen
 import com.example.racefeeds.ui.screens.firebase.AuthGateScreen
 import com.example.racefeeds.ui.screens.firebase.AuthViewModel
 import com.example.racefeeds.ui.screens.firebase.LoginScreen
 import com.example.racefeeds.ui.screens.firebase.SignupScreen
+import com.example.racefeeds.ui.screens.home.HomeScreen
 import com.example.racefeeds.ui.screens.settings.SettingsScreen
 import com.example.racefeeds.ui.screens.settings.SettingsViewModel
 
@@ -175,8 +175,12 @@ fun AppNavGraph(
 
 
     NavHost(
-        navController = navController, startDestination = BottomNavItem.Feed.route
+        navController = navController, startDestination = BottomNavItem.Home.route
     ) {
+        composable(BottomNavItem.Home.route){
+            HomeScreen(navController = navController,
+                innerPadding = contentPadding)
+        }
 
         composable(BottomNavItem.Feed.route) {
             FarmPage(
@@ -290,7 +294,7 @@ fun BottomBar(
     currentDestination: NavDestination?,
 ) {
     val items = listOf(
-        BottomNavItem.Feed, BottomNavItem.Tool, BottomNavItem.Cart, BottomNavItem.Home
+        BottomNavItem.Home, BottomNavItem.Feed, BottomNavItem.Tool, BottomNavItem.Cart,
     )
     val cartViewModel: CartViewModel = viewModel()
     val cartCount by cartViewModel.cartCount.collectAsState()

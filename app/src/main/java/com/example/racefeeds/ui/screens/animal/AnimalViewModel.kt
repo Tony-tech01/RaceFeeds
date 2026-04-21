@@ -1,4 +1,4 @@
-package com.example.racefeeds.ui.screens.Animal
+package com.example.racefeeds.ui.screens.animal
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -3,6 +3,7 @@ package com.example.racefeeds.ui.screens.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,34 +19,45 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.racefeeds.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(){
+fun HomeScreen(
+    navController: NavController,
+    innerPadding: PaddingValues
+){
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF9F9F9))
-            .padding(16.dp)
+            .padding(innerPadding)
     ){
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.Gray)
+                .padding(horizontal = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ){
             Column{
                 Text(
                     "Welcome ",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
+                    color = Color.White
                 )
                 Text(
                     text = "Race Feeds",
                     style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.SemiBold,
+                    color = colorResource(id = R.color.deep_green)
                 )
             }
             IconButton(onClick = { /* Profile/Settings */ }) {

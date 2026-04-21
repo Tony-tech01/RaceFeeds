@@ -107,7 +107,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(), bottomBar = {
                         if (currentDestination?.route in listOf(
                                 BottomNavItem.Feed.route,
-                                BottomNavItem.Farm.route,
+                                BottomNavItem.Tool.route,
                                 BottomNavItem.Cart.route
                             )
                         ) {

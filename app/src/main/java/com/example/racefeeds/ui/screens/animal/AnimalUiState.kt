@@ -1,4 +1,4 @@
-package com.example.racefeeds.ui.screens.Animal
+package com.example.racefeeds.ui.screens.animal
 
 data class AnimalUiState(
     val searchQuery: String = "",
