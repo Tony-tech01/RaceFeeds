@@ -28,6 +28,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.racefeeds.data.BottomNavItem
@@ -93,6 +94,14 @@ class MainActivity : ComponentActivity() {
             val view = LocalView.current
 
             val window = (view.context as Activity).window
+            val showBottomBar = currentDestination?.hierarchy?.any {
+                it.route in listOf(
+                    BottomNavItem.Home.route,
+                    BottomNavItem.Feed.route,
+                    BottomNavItem.Tool.route,
+                    BottomNavItem.Cart.route
+                )
+            } == true
             SideEffect {
                 window.statusBarColor = Color.Transparent.toArgb()
                 window.navigationBarColor = Color.Transparent.toArgb()
@@ -105,15 +114,11 @@ class MainActivity : ComponentActivity() {
             RaceFeedsTheme(darkTheme = isDarkMode) {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(), bottomBar = {
-                        if (currentDestination?.route in listOf(
-                                BottomNavItem.Feed.route,
-                                BottomNavItem.Tool.route,
-                                BottomNavItem.Cart.route
-                            )
-                        ) {
+                        if (showBottomBar) {
                             BottomBar(
                                 navController = navController,
-                                currentDestination = currentDestination
+                                currentDestination = currentDestination,
+                                cartViewModel = cartViewModel
                             )
                         }
                     }) { contentPadding ->

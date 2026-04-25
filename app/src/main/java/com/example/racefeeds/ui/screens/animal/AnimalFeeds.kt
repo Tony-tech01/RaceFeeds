@@ -71,34 +71,7 @@ fun FarmPage(
     val focusManager = LocalFocusManager.current
 
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                Text(
-                    "Race Feeds", style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp
-                    )
-                )
-            },
-                actions = {
-                    IconButton(onClick = { navController.navigate("settings") }) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-                },
-                modifier = Modifier.statusBarsPadding(),
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = colorResource(id = R.color.deep_green),
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White,
-                    actionIconContentColor = Color.White
-                )
-            )
-        }) { innerPadding ->
+    Scaffold { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)

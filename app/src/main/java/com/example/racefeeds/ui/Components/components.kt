@@ -292,11 +292,11 @@ fun AppNavGraph(
 fun BottomBar(
     navController: NavController,
     currentDestination: NavDestination?,
+    cartViewModel: CartViewModel,
 ) {
     val items = listOf(
         BottomNavItem.Home, BottomNavItem.Feed, BottomNavItem.Tool, BottomNavItem.Cart,
     )
-    val cartViewModel: CartViewModel = viewModel()
     val cartCount by cartViewModel.cartCount.collectAsState()
 
     NavigationBar {
